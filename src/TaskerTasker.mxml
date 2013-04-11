@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:WindowedApplication xmlns:mx="http://www.adobe.com/2006/mxml" 
+						xmlns:stackTimer="com.yjacket.taskerTasker.*"
+						xmlns:view="com.yjacket.taskerTasker.view.*"
+						title="TaskerTasker" layout="vertical" 
+						creationComplete="init()" applicationDeactivate="flush()"
+						fontFamily="Tahoma" fontSize="11"
+						minWidth="400" minHeight="430"
+						paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+	<mx:Script>
+		<![CDATA[
+			import com.yjacket.taskerTasker.model.Task;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			
+			[Embed(source="assets/clock_add.png")] private static const ADD_ICON:Class;
+			[Embed(source="assets/arrow_up.png")] private static const ACTIVE_ICON:Class;
+			[Embed(source="assets/clock_delete.png")] private static const DELETE_ICON:Class;
+			[Embed(source="assets/bin.png")] private static const EMPTY_ICON:Class;
+			[Embed(source="assets/information.png")] private static const INFO_ICON:Class;
+			
+			private var _inProgress:ArrayCollection = new ArrayCollection();
+			
+			[Bindable] private var _inProgressStack:ArrayCollection = new ArrayCollection();
+			[Bindable] private var _completed:ArrayCollection = new ArrayCollection();
+			[Bindable] private var _selectedIndex:int = 0;
+			
+			private var _so:SharedObject = SharedObject.getLocal("StackTimer", "/");
+			
+			private function init():void
+			{
+				currentState = "base";
+				
+				registerClassAlias("Task", Task);
+				
+				if (_so.data.inProgress)
+					_inProgress = new ArrayCollection(_so.data.inProgress);
+				
+				if (_so.data.completed)
+					_completed = new ArrayCollection(_so.data.completed);
+				
+				measureActiveTask();
+			}
+			
+			private function flush():void
+			{
+				_so.data.inProgress = _inProgress.source;
+				_so.data.completed = _completed.source;
+				_so.flush();
+			}
+			
+			private function measureActiveTask():void
+			{
+				if (_inProgress.length == 0)
+					activeTaskViewer.setIdle();
+				else
+					activeTaskViewer.activeTask = _inProgress.getItemAt(0) as Task;
+				
+				_inProgressStack.disableAutoUpdate();
+				_inProgressStack.source = _inProgress.source.slice(1, _inProgress.length);
+				_inProgressStack.enableAutoUpdate();
+			}
+			
+			private function add(event:Event):void
+			{
+				if (_selectedIndex != 0) _selectedIndex = 0;
+				
+				if (event.target.text == null || event.target.text.length == 0)
+				{
+					Alert.show("Please input new task name", "ERROR");
+					return;
+				}
+						
+				_inProgress.addItemAt(new Task(event.target.text), 0);
+				
+				this.setFocus();
+				event.target.text = null;
+				event.target.visible = event.target.includeInLayout = false;
+				
+				flush();
+				measureActiveTask();
+			}
+			
+			private function promote():void
+			{
+				if (_selectedIndex != 0) return;
+				
+				var t:Task = inProgress.selectedItem as Task;
+				
+				if (!t) return;
+				
+				Alert.show("Do you want to promote '" + t.name + "' as active task?", "CONFIRM", 3, null, function(event:CloseEvent):void
+				{
+					if (event.detail == Alert.YES)
+					{
+						_inProgress.addItemAt(_inProgress.removeItemAt(_inProgress.getItemIndex(t)), 0);
+						measureActiveTask();
+					}
+				});
+			}
+			private function complete(t:Task):void
+			{
+				_inProgress.removeItemAt(0);
+				t.end = new Date();
+				_completed.addItemAt(t, 0);
+				flush();
+				measureActiveTask();
+			}
+			
+			private function onComplete():void
+			{
+				var t:Task = activeTaskViewer.activeTask;
+				
+				if (t.isIdle) return;
+				
+				Alert.show("Did you complete '" + t.name + "'?", "CONFIRM", 3, null, function(event:CloseEvent):void
+				{
+					if (event.detail == Alert.YES)
+						complete(t);
+				});
+			}
+			
+			private function onLater():void
+			{
+				var t:Task = activeTaskViewer.activeTask;
+				
+				if (t.isIdle) return;
+				
+				Alert.show("Would you like to do '" + t.name + "' later?", "CONFIRM", 3, null, function(event:CloseEvent):void
+				{
+					if (event.detail == Alert.YES)
+					{
+						t.later = true;
+						complete(t);
+					}
+				});
+			}
+			
+			private function empty():void
+			{
+				Alert.show("Do you want to emtpy entire tasks?", "CONFIRM", 3, null, function(event:CloseEvent):void
+				{
+					if (event.detail == Alert.YES)
+					{
+						Alert.show("Are you sure?", "WARNING", 3, null, function(event:CloseEvent):void
+						{
+							if (event.detail == Alert.YES)
+							{
+								_inProgress.removeAll();
+								_completed.removeAll();
+								flush();
+								measureActiveTask();
+							}
+						});
+					}
+				});
+				
+			}
+			
+			private function remove():void
+			{
+				if (_selectedIndex != 1) return;
+				
+				var t:Task = completed.selectedItem as Task;
+				
+				if (!t) return;
+				
+				Alert.show("Do you want to remove '" + t.name + "'?", "CONFIRM", 3, null, function(event:CloseEvent):void
+				{
+					if (event.detail == Alert.YES)
+					{
+						_completed.removeItemAt(_completed.getItemIndex(t));
+						flush();
+					}
+				});
+			}
+			
+			private function toggleAddButton():void
+			{
+				var b:Boolean = newTaskInput.visible;
+				newTaskInput.visible = newTaskInput.includeInLayout = !b;
+				if (!b) newTaskInput.setFocus();
+			}
+		]]>
+	</mx:Script>
+
+	<mx:states>
+		
+		<mx:State name="base">
+		
+			<mx:AddChild position="lastChild" relativeTo="{this}">
+				<mx:HBox width="100%" height="25" verticalAlign="middle">
+					<mx:LinkButton icon="{ADD_ICON}" label="New" toolTip="Add new task" click="toggleAddButton()" visible="{_selectedIndex == 0}" includeInLayout="{_selectedIndex == 0}" />
+					<mx:LinkButton icon="{ACTIVE_ICON}" label="Promote" toolTip="Promote selected task to active task" click="promote()" visible="{_selectedIndex == 0}" includeInLayout="{_selectedIndex == 0}" />
+					<mx:LinkButton icon="{DELETE_ICON}" label="Delete" toolTip="Delete selected task" click="remove()" visible="{_selectedIndex == 1}" includeInLayout="{_selectedIndex == 1}" />
+					<mx:Spacer width="100%"/>
+					<mx:LinkButton icon="{INFO_ICON}" label="About" click="{currentState = 'about'}" />
+				</mx:HBox>
+			</mx:AddChild>
+			
+			<mx:AddChild position="lastChild" relativeTo="{this}">
+				<mx:TextInput id="newTaskInput" enter="add(event)" textIndent="5" paddingTop="3" focusEnabled="false"
+							  width="100%" fontSize="14" maxChars="30" visible="false" includeInLayout="false"
+							  borderStyle="solid" borderThickness="0" backgroundAlpha="0.9" cornerRadius="5" />
+			</mx:AddChild>
+			
+			<mx:AddChild position="lastChild" relativeTo="{this}">
+				<view:ActiveTaskView id="activeTaskViewer" change="flush()" complete="onComplete()" later="onLater()" />
+			</mx:AddChild>
+			
+			<mx:AddChild position="lastChild" relativeTo="{this}">
+				
+				<mx:ViewStack width="100%" height="100%" selectedIndex="{_selectedIndex}">
+					
+					<mx:VBox width="100%" height="100%" backgroundAlpha="0.5"
+							 cornerRadius="5" borderStyle="solid" borderThickness="0" backgroundColor="white"
+							 paddingBottom="5" paddingLeft="5" paddingRight="5" paddingTop="5">
+						<mx:List id="inProgress" width="100%" height="100%" backgroundAlpha="0"
+								 dataProvider="{_inProgressStack}" borderStyle="solid" borderThickness="0"
+								 itemRenderer="com.yjacket.taskerTasker.itemRenderer.InProgressTaskItemRenderer"
+								 visible="{_inProgressStack.length != 0}" includeInLayout="{_inProgressStack.length != 0}" />
+						<mx:VBox width="100%" height="100%" horizontalAlign="center" verticalAlign="middle"
+								 visible="{_inProgressStack.length == 0}" includeInLayout="{_inProgressStack.length == 0}">
+							<mx:Label text="There are no inactive tasks" fontSize="14" color="silver" /> 
+						</mx:VBox>
+							
+					</mx:VBox>
+					
+					<mx:VBox width="100%" height="100%">
+						<mx:DataGrid id="completed" width="100%" height="100%" dataProvider="{_completed}">
+							<mx:columns>
+								<mx:DataGridColumn headerText="Task" dataField="name" dataTipField="memo"/> 					
+								<mx:DataGridColumn headerText="Begin" dataField="begin"/> 					
+								<mx:DataGridColumn headerText="End" dataField="end"/> 					
+								<mx:DataGridColumn headerText="Elapsed" dataField="elapsed"/> 					
+								<mx:DataGridColumn headerText="Later" dataField="later"/> 					
+							</mx:columns>
+						</mx:DataGrid>
+					</mx:VBox>
+					
+				</mx:ViewStack>
+				
+			</mx:AddChild>
+			
+			<mx:AddChild position="lastChild" relativeTo="{this}">
+				<mx:LinkBar dataProvider="{['In Progress', 'Completed']}" itemClick="{event.target.selectedIndex = _selectedIndex = event.index}" fontSize="9" />
+			</mx:AddChild>
+			
+		</mx:State>
+		
+		<mx:State name="about">
+		
+			<mx:AddChild position="lastChild" relativeTo="{this}">
+				<mx:HBox width="100%" height="25" verticalAlign="middle">
+					<mx:LinkButton label="Empty entire tasks" icon="{EMPTY_ICON}" toolTip="Empty entire in-progress/completed tasks" click="empty()" />
+					<mx:Spacer width="100%"/>
+					<mx:LinkButton label="About" icon="{INFO_ICON}" click="{currentState = 'base'}" />
+				</mx:HBox>
+			</mx:AddChild>
+			
+			<mx:AddChild position="lastChild" relativeTo="{this}">
+				<view:About />
+			</mx:AddChild>
+			
+		</mx:State>
+		
+	</mx:states>
+	
+</mx:WindowedApplication>

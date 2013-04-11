@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+		 width="100%" horizontalAlign="center" 
+		 borderStyle="solid" borderThickness="0" cornerRadius="5" 
+		 backgroundColor="white"
+		 paddingBottom="10" paddingTop="10" paddingLeft="10" paddingRight="10"
+		 creationComplete="onInit()">
+	
+	<mx:Metadata>
+		[Event(name="change", type="flash.events.Event")]
+		[Event(name="complete", type="flash.events.Event")]
+		[Event(name="later", type="flash.events.Event")]
+	</mx:Metadata>
+	
+	
+	<mx:Script>
+		<![CDATA[
+			import com.yjacket.taskerTasker.model.IdleTask;
+			import com.yjacket.taskerTasker.model.Task;
+			
+			[Embed(source="assets/tick.png")] private static const COMPLETE_ICON:Class;
+			[Embed(source="assets/arrow_right.png")] private static const LATER_ICON:Class;
+			[Embed(source="assets/note.png")] private static const MEMO_ICON:Class;
+			
+			private var _idle:IdleTask = new IdleTask();
+			private var _timer:Timer;
+			private var _tick:Boolean;
+			
+			[Bindable] private var _task:Task = _idle;
+			[Bindable] private var _elapsed:String = "";
+			
+			public function set activeTask(t:Task):void
+			{
+				_task = t;
+			}
+			
+			public function get activeTask():Task
+			{
+				return _task;
+			}
+			
+			public function setIdle():void
+			{
+				_idle.begin = new Date();
+				_task = _idle;
+			}
+			
+			
+			private function onClick(event:Event):void
+			{
+				event.currentTarget.editable = !_task.isIdle;
+			}
+			
+			private function onInit():void
+			{
+				_timer = new Timer(500);
+				_timer.addEventListener(TimerEvent.TIMER, onTimer);
+				_timer.start();
+			}
+			
+			private function onChangeTaskName():void
+			{
+				if (_task.name != taskNameEditor.text)
+				{
+					_task.name = taskNameEditor.text;
+					dispatchEvent(new Event("change"));
+				}
+				
+				taskNameEditor.editable = false;
+			}
+
+			private function onComplete(event:Event):void
+			{
+				dispatchEvent(new Event("complete"));
+			}
+			
+			private function onLater(event:Event):void
+			{
+				dispatchEvent(new Event("later"));
+			}
+			
+			private function onTimer(event:TimerEvent):void
+			{
+				_tick = !_tick;
+				_elapsed = _tick ? _task.elapsed : _task.elapsed.replace(/:/g, " ");
+			}
+		]]>
+	</mx:Script>
+	
+	<mx:VBox width="100%" horizontalAlign="center" verticalGap="10">
+		
+		<mx:VBox width="100%" cornerRadius="5" borderStyle="solid" borderThickness="0" 
+				 backgroundColor="black" paddingBottom="5" paddingTop="5" horizontalAlign="center" verticalAlign="middle">
+			<mx:Label text="{_elapsed}" toolTip="{'began at ' + _task.begin.toLocaleString()}" 
+					  color="white" fontSize="36" fontWeight="bold" fontFamily="Century Gothic Bold" />
+		</mx:VBox>
+		
+		<mx:TextInput id="taskNameEditor" 
+					  text="{_task.name}"
+					  toolTip="Your active task"
+					  maxChars="30"
+					  editable="false" width="100%" focusEnabled="false"
+					  borderStyle="solid" borderThickness="0" backgroundAlpha="0" letterSpacing="-1"
+					  fontSize="15" fontWeight="bold" color="black" textAlign="center"
+					  enter="onChangeTaskName()" focusOut="onChangeTaskName()" click="onClick(event)" />
+		
+		<mx:TextArea id="memo" focusEnabled="false"
+					 visible="{_task.isIdle ? false : _task.memo.length != 0}" includeInLayout="{_task.isIdle ? false : _task.memo.length != 0}" 
+					 width="100%" height="34" showEffect="Fade" paddingLeft="5" paddingRight="5"
+					 text="{_task.memo}" change="{_task.memo = event.target.text}" 
+					 fontSize="11" backgroundColor="#FFFFE1" cornerRadius="5" borderStyle="solid" borderThickness="1" borderColor="#cccccc" />
+		
+		<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" visible="{!_task.isIdle}" includeInLayout="{!_task.isIdle}">
+			<mx:LinkButton icon="{MEMO_ICON}" toolTip="Add memo" click="{memo.visible = memo.includeInLayout = !memo.visible}" fontWeight="normal" fontSize="10" />
+			<mx:Spacer width="100%"/>
+			<mx:LinkButton label="Complete" icon="{COMPLETE_ICON}" toolTip="Click here to complete active task" click="onComplete(event)" fontSize="12" />
+			<mx:Spacer width="100%"/>
+			<mx:LinkButton icon="{LATER_ICON}" toolTip="Do it later" click="onLater(event)" fontWeight="normal" fontSize="10" />
+		</mx:HBox>
+	</mx:VBox>
+	
+</mx:VBox>

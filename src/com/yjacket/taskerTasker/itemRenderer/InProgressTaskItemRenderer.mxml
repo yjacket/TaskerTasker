@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" verticalScrollPolicy="off" horizontalScrollPolicy="off" verticalGap="0">
+
+	<mx:Script>
+		<![CDATA[
+			import com.yjacket.taskerTasker.model.Task;
+		]]>
+	</mx:Script>
+	
+	<mx:Label text="{(data as Task).begin.toLocaleString()}" fontSize="9" color="gray" width="100%" />
+	<mx:Label text="{(data as Task).name}" fontSize="16" color="0x666666" width="100%" />
+	
+</mx:VBox>

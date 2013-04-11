@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" 
+		 label="About" 
+		 width="100%" height="100%" verticalGap="0" horizontalAlign="center"
+		 cornerRadius="5" borderStyle="solid" borderThickness="0" backgroundColor="white"
+		 paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			
+			[Embed(source="assets/graphite_smooth_folder_clock_48.png")] private static const ICON:Class;
+		]]>
+	</mx:Script>
+	
+	<mx:HBox width="100%" height="100" horizontalAlign="center" verticalAlign="middle" paddingBottom="5">
+		<mx:Image source="{ICON}"/>
+		<mx:VBox verticalGap="0">
+			<mx:Label enabled="true" fontSize="20" fontWeight="bold" text="TaskerTasker"/>
+			<mx:Label text="Time management based on stack" fontSize="14" />
+		</mx:VBox>
+	</mx:HBox>
+	
+	<mx:Label text="version: 1.0 beta (2013-04-11)" />
+	<mx:Label htmlText="written by &lt;u&gt;801020@gmail.com&lt;/u&gt;"
+			  click="{navigateToURL(new URLRequest('mailto:801020@gmail.com'), '_blank')}" />
+	<mx:Label htmlText="website: &lt;u&gt;http://blog.yjacket.com&lt;/u&gt;"
+			  click="{navigateToURL(new URLRequest('http://blog.yjacket.com/'), '_blank')}" />
+	
+	<mx:Label text="CREDITS" fontWeight="bold" fontSize="14" paddingTop="20" />
+	<mx:Label htmlText="Original concept: Jang-Ho Hwang(&lt;u&gt;http://xrath.com&lt;/u&gt;)"
+			  click="{navigateToURL(new URLRequest('http://xrath.com/2012/05/time-management-based-on-stack/'), '_blank')}" />
+	<mx:Label htmlText="Icon: Silk Icons(&lt;u&gt;http://famfamfam.com&lt;/u&gt;)"
+			  click="{navigateToURL(new URLRequest('http://www.famfamfam.com/lab/icons/silk/'), '_blank')}" />
+	
+</mx:VBox>
