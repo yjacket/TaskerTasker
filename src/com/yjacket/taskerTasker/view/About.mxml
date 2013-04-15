@@ -32,5 +32,7 @@
 			  click="{navigateToURL(new URLRequest('http://xrath.com/2012/05/time-management-based-on-stack/'), '_blank')}" />
 	<mx:Label htmlText="Icon: Silk Icons(&lt;u&gt;http://famfamfam.com&lt;/u&gt;)"
 			  click="{navigateToURL(new URLRequest('http://www.famfamfam.com/lab/icons/silk/'), '_blank')}" />
+	<mx:Label htmlText="Aqua Blend(&lt;u&gt;http://lbaumann.com&lt;/u&gt;)" paddingLeft="25"
+			  click="{navigateToURL(new URLRequest('http://lbaumann.com'), '_blank')}" />
 	
 </mx:VBox>
