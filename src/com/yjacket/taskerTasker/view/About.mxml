@@ -24,7 +24,7 @@
 	<mx:Label text="version: 1.0 beta (2013-04-11)" />
 	<mx:Label htmlText="written by &lt;u&gt;801020@gmail.com&lt;/u&gt;"
 			  click="{navigateToURL(new URLRequest('mailto:801020@gmail.com'), '_blank')}" />
-	<mx:Label htmlText="website: &lt;u&gt;http://blog.yjacket.com&lt;/u&gt;"
+	<mx:Label htmlText="website: &lt;u&gt;http://yjacket.tistory.com&lt;/u&gt;"
 			  click="{navigateToURL(new URLRequest('http://blog.yjacket.com/'), '_blank')}" />
 	
 	<mx:Label text="CREDITS" fontWeight="bold" fontSize="14" paddingTop="20" />

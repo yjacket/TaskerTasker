@@ -113,9 +113,9 @@
 		<mx:HBox width="100%" horizontalAlign="center" verticalAlign="middle" visible="{!_task.isIdle}" includeInLayout="{!_task.isIdle}">
 			<mx:LinkButton icon="{MEMO_ICON}" toolTip="Add memo" click="{memo.visible = memo.includeInLayout = !memo.visible}" fontWeight="normal" fontSize="10" />
 			<mx:Spacer width="100%"/>
-			<mx:LinkButton label="Complete" icon="{COMPLETE_ICON}" toolTip="Click here to complete active task" click="onComplete(event)" fontSize="12" />
+			<mx:LinkButton label="Complete" icon="{COMPLETE_ICON}" toolTip="Click here to complete active task(CTRL+ENTER)" click="onComplete(event)" fontSize="12" />
 			<mx:Spacer width="100%"/>
-			<mx:LinkButton icon="{LATER_ICON}" toolTip="Do it later" click="onLater(event)" fontWeight="normal" fontSize="10" />
+			<mx:LinkButton icon="{LATER_ICON}" toolTip="Do it later(CTRL+DELETE)" click="onLater(event)" fontWeight="normal" fontSize="10" />
 		</mx:HBox>
 	</mx:VBox>
 	

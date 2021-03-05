@@ -4,10 +4,11 @@
 	<mx:Script>
 		<![CDATA[
 			import com.yjacket.taskerTasker.model.Task;
+			import com.yjacket.taskerTasker.util.Dates;
 		]]>
 	</mx:Script>
 	
-	<mx:Label text="{(data as Task).begin.toLocaleString()}" fontSize="9" color="gray" width="100%" />
+	<mx:Label text="{Dates.toString((data as Task).begin)}" fontSize="9" color="gray" width="100%" />
 	<mx:Label text="{(data as Task).name}" fontSize="16" color="0x666666" width="100%" />
 	
 </mx:VBox>

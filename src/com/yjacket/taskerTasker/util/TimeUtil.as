@@ -18,7 +18,7 @@ package com.yjacket.taskerTasker.util
 			if (second >= DAY) 
 			{
 				var t:int = int(second / DAY);
-				result = t + (t == 1 ? " Day " : " Days ");
+				result = t + "d ";
 				second = second % DAY;
 			}
 			

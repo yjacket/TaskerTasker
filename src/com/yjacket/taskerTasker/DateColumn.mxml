@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:DataGridColumn xmlns:mx="http://www.adobe.com/2006/mxml" width="120"
+				   labelFunction="dateToString" sortCompareFunction="sortDateField">
+	<mx:Script>
+		<![CDATA[
+			import com.yjacket.taskerTasker.util.Dates;
+			
+			import mx.controls.dataGridClasses.DataGridColumn;
+			import mx.utils.ObjectUtil;
+			
+			private var _columnField:DataGridColumn = null;
+			private var _format:String = "YYYY-MM-DD J:NN:SS";
+			
+			public function set datetimeFormat(format:String):void
+			{
+				_format = format;
+			}
+			
+			public function dateToString(data:Object, column:DataGridColumn):String
+			{
+				_columnField = column;
+				return Dates.toString(data[column.dataField], _format);	
+			}
+			
+			public function sortDateField(itemA:Object, itemB:Object):int
+			{
+				return ObjectUtil.dateCompare(itemA[_columnField.dataField], itemB[_columnField.dataField]);
+			}
+		]]>
+	</mx:Script>
+</mx:DataGridColumn>

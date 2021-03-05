@@ -42,7 +42,7 @@
 				if (_so.data.completed)
 					_completed = new ArrayCollection(_so.data.completed);
 				
-				measureActiveTask();
+				measureActiveTask();				
 			}
 			
 			private function flush():void
@@ -184,6 +184,29 @@
 				newTaskInput.visible = newTaskInput.includeInLayout = !b;
 				if (!b) newTaskInput.setFocus();
 			}
+			
+			private function onKeyUp(event:KeyboardEvent):void
+			{
+				event.stopImmediatePropagation();
+				
+				if (!event.controlKey) return;
+				
+				if (event.keyCode == Keyboard.INSERT)
+					toggleAddButton();
+				else if (event.keyCode == Keyboard.DELETE)
+				{
+					if (_selectedIndex == 0)
+						onLater();
+					else
+						remove();
+				}
+				else if (event.keyCode == Keyboard.ENTER)
+					onComplete();
+				else if (event.keyCode == Keyboard.PAGE_UP)
+					promote();
+				else if (event.keyCode == Keyboard.TAB)
+					_selectedIndex = _selectedIndex == 0 ? 1 : 0;
+			}
 		]]>
 	</mx:Script>
 
@@ -193,9 +216,9 @@
 		
 			<mx:AddChild position="lastChild" relativeTo="{this}">
 				<mx:HBox width="100%" height="25" verticalAlign="middle">
-					<mx:LinkButton icon="{ADD_ICON}" label="New" toolTip="Add new task" click="toggleAddButton()" visible="{_selectedIndex == 0}" includeInLayout="{_selectedIndex == 0}" />
-					<mx:LinkButton icon="{ACTIVE_ICON}" label="Promote" toolTip="Promote selected task to active task" click="promote()" visible="{_selectedIndex == 0}" includeInLayout="{_selectedIndex == 0}" />
-					<mx:LinkButton icon="{DELETE_ICON}" label="Delete" toolTip="Delete selected task" click="remove()" visible="{_selectedIndex == 1}" includeInLayout="{_selectedIndex == 1}" />
+					<mx:LinkButton icon="{ADD_ICON}" label="New" toolTip="Add new task(CTRL+INS)" click="toggleAddButton()" visible="{_selectedIndex == 0}" includeInLayout="{_selectedIndex == 0}" />
+					<mx:LinkButton icon="{ACTIVE_ICON}" label="Promote" toolTip="Promote selected task to active task(CTRL+PAGEUP)" click="promote()" visible="{_selectedIndex == 0}" includeInLayout="{_selectedIndex == 0}" />
+					<mx:LinkButton icon="{DELETE_ICON}" label="Delete" toolTip="Delete selected task(CTRL+DELETE)" click="remove()" visible="{_selectedIndex == 1}" includeInLayout="{_selectedIndex == 1}" />
 					<mx:Spacer width="100%"/>
 					<mx:LinkButton icon="{INFO_ICON}" label="About" click="{currentState = 'about'}" />
 				</mx:HBox>
@@ -208,7 +231,8 @@
 			</mx:AddChild>
 			
 			<mx:AddChild position="lastChild" relativeTo="{this}">
-				<view:ActiveTaskView id="activeTaskViewer" change="flush()" complete="onComplete()" later="onLater()" />
+				<view:ActiveTaskView id="activeTaskViewer" change="flush()" complete="onComplete()" later="onLater()" 
+									 creationComplete="{stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp);}"/>
 			</mx:AddChild>
 			
 			<mx:AddChild position="lastChild" relativeTo="{this}">
@@ -232,9 +256,9 @@
 					<mx:VBox width="100%" height="100%">
 						<mx:DataGrid id="completed" width="100%" height="100%" dataProvider="{_completed}">
 							<mx:columns>
-								<mx:DataGridColumn headerText="Task" dataField="name" dataTipField="memo"/> 					
-								<mx:DataGridColumn headerText="Begin" dataField="begin"/> 					
-								<mx:DataGridColumn headerText="End" dataField="end"/> 					
+								<mx:DataGridColumn headerText="Task" dataField="name" dataTipField="memo"/>
+								<stackTimer:DateColumn headerText="Begin" dataField="begin"/> 					
+								<stackTimer:DateColumn headerText="End" dataField="end"/> 					
 								<mx:DataGridColumn headerText="Elapsed" dataField="elapsed"/> 					
 								<mx:DataGridColumn headerText="Later" dataField="later"/> 					
 							</mx:columns>
