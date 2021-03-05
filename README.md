@@ -9,4 +9,4 @@ Time management based on stack
 
 **CREDITS**
 - Original concept: Jang-Ho Hwang <https://xrath.com/2012/05/time-management-based-on-stack/>
-- Icon: [Silk Icons][http://famfamfam.com], [Aqua Blend][http://lbaumann.com]
+- Icon: [Silk Icons](http://famfamfam.com), [Aqua Blend](http://lbaumann.com)
